@@ -1,0 +1,866 @@
+
+
+# Two Numerical Variables
+
+
+```{r message=FALSE}
+require(tigerstats)
+require(knitr)
+require(manipulate)
+```
+
+## Introduction
+
+
+In Chapter 4, we investigated methods for describing relationships between two *categorical* variables, using 
+* tables and row percents
+* chi-square statistic
+* P-value
+* 5-step test
+
+In this chapter, we are going to investigate methods for describing relationships between two *numerical* variables.  
+
+We learned in Chapter 2 how to give graphical and numerical summaries of **one** numerical variable.  The methods we used were:
+
+**Graphical**
+* Dotplot
+* Histogram
+* Density Plot
+* Stem Plot
+* Box Plot (and the really cool Violin Plot)
+
+**Numerical**
+* Median
+* Percentiles
+* 5 number summary
+* Mean
+* SD
+* IQR
+
+Now, let's look at how 2 numerical variables relate!
+
+Throughout this chapter, we're going to work with 3 different datasets:  ``m111survey``, ``pennstate1``, and ``ucdavis1``.  The datasets ``pennstate1`` and ``ucdavis1`` are both surveys of students at their respective schools, very similar to what we've seen in ``m111survey``.  Let's put all of these in our workspace and take a look at them.
+
+```{r}
+data(m111survey)
+data(pennstate1)
+data(ucdavis1)
+```
+
+Go ahead and take a minute to view them, so that we have some idea what kinds of variables are present.  
+
+```{r, eval=FALSE}
+View(m111survey)
+View(pennstate1)
+View(ucdavis1)
+```
+
+Let's start by reviewing the difference between *categorical* and *numerical* variables.  
+
+>**Practice:**  Classify each variable in the datasets ``pennstate1`` and ``ucdavis1``.
+
+## Kinds of Relationships
+
+
+When we look at relationships between numerical variables, there are 2 main kinds of relationships that interest us.
+
+* **Deterministic** relationships
+* **Statistical** relationships
+
+**Deterministic** relationships are the type you are used to seeing in algebra class.  In this kind of relationship, the value of one variable can be *exactly* determined by the value of the other variable.  
+
+For example, consider the relationship between degrees Fahrenheit and degrees Celcius.  If $y= ^\circ$ C and $x= ^\circ$ F, the *deterministic* relationship can be written
+
+$$y=\frac{5}{9}(x-32)$$
+
+The degrees Celcius ($y$ )is exactly determined by knowing the degrees Fahrenheit ($x$).  What do you think the graph of this equation will look like?
+
+Let's check this out by plotting $y=\frac{5}{9}(x-32)$ for various values of $x$.  (Don't worry about the code right now.  We'll get to it momentarily.)
+
+```{r fcplot,fig.width=5,fig.height=5,fig.cap="Relationship Between Fahrenheit and Celcius"}
+fahr=seq(0,100,0.1)
+celc=(5/9)*(fahr-32)
+xyplot(celc~fahr,xlab="Degrees Fahrenheit", ylab="Degrees Celcius")
+```
+
+You can see from this graph that there is no variation in the pattern.  This is a perfect relationship!
+.
+
+**Statistical** relationships are the ones that we're going to study in this class.  In this kind of relationship, there is variation from the average pattern.  If we know the value of one variable, we can *estimate* the *typical* value of the other variable.  However, this is only an estimation.  There is no certainty!
+
+There are 3 tools that we will use to describe **statistical** relationships:
+* Scatterplots
+* Correlation
+* Regression Equation
+
+## Scatterplots
+
+
+We can use one of the tools we studied in Chapter 2 to start examining the relationship between 2 numerical variables.  
+
+### Research Question:  At Pennstate, how is a student's right handspan related to his/her height?
+
+Let's go back to the ``DtrellHist`` app and apply it to numerical data:
+
+```{r,eval=FALSE}
+require(manipulate)
+DtrellHist(~Height|RtSpan,data=pennstate1)
+```
+
+It seems when ``RtSpan`` is big, ``Height`` is also big, but is there another way to look at it where all the data are displayed in a connected fashion?
+
+A **scatterplot** is how we will graphically display the relationship between 2 numerical variables.  (The temperature plot you saw above was an example of a *scatterplot*, although is certainly didn't have alot of scatter!)
+
+The best way to get a *feel* for this relationship is to check out the scatterplot.
+
+```{r xyhandheight,fig.width=5,fig.height=5,fig.cap="Relationship Between Right Handspan and Height",tidy=FALSE}
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)",
+       ylab="Height (in)", ) #this is 'formula-data' input.
+```
+
+**Note**:  The 'formula-data' input syntax for an ``xyplot`` should be starting to become familiar to you.  This follows the syntax  ``goal(y~x,data=Mydataset)`` like the graphical outputs from Chapter 2 did.  ``R`` will plot the variable in front of the ``~`` along the vertical axis and the variable behind the ``~`` along the horizontal axis.  Typically, we put the explanatory variable along the horizontal axis and the response variable along the vertical axis.  Keep in mind, however, that this distinction is up to you; R neither knows nor cares about explanatory vs. response.
+
+If you don't like the way the points look, you can control this using ``pch`` and ``col`` in the ``xyplot`` function.  For example, if you want solid red points:
+
+```{r,fig.width=5,fig.height=5}
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height",col="red",pch=19) 
+```
+
+There are different values of ``pch``.  To learn more, consult GeekNotes!
+
+Just like in Chapter 2, you can look at scatterplots in separate panels by "conditioning" on a category, such as **Sex**.
+
+```{r fig.width=5, fig.height=4}
+xyplot(Height~RtSpan|Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height")
+```
+
+You may also want to "overlay"" two scatterplots, one for the guys and one for the gals.  Recall: overlaying can be accomplished using the *groups* argument:
+
+```{r fig.width=6, fig.height=6}
+xyplot(Height~RtSpan,groups=Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height and ",auto.key=TRUE)
+```
+
+**Note**:  Given several numerical variables, R can produce a group of scatterplots, one for each pair of variables -- all in one graph.  Such a graph is called a *scatterplot matrix*.  For more information, consult GeekNotes.
+
+>**Practice:** Investigate graphically the Research Question:  At UCDavis, how is a student's height (``Height``) related to his or her Dad's height (``dadheight``)?  Practice "overlaying" and "conditioning" on a categorical variable of your choice!  (Try a variable other than **Sex**.)  Describe any relationship that you observe.
+
+**Scatterplots** allow us to visually identify 
+
+* overall patterns,
+* directions, and
+* strength of association.
+
+Okay back to the plot...
+
+In our example from Pennstate, you might have noticed that the larger a student's right handspan, the taller the student tended to be.  (This should make some intuitive sense, as well.)  However, there is variation in the points on the scatterplot.  For example, there are people of varying heights that all have a 20 cm right handspan. Even though we may observe an overall *trend* in the scatterplot, the pattern is not perfect. 
+
+One way to describe the scatterplot is by giving a name to the **direction** of the observed pattern.
+
+In our scatterplot, we could say that the variables ``RtSpan`` and ``Height`` are **positively associated** since students with larger handspans tend to be on the tall side and students with smaller handspans tend to be on the short side.  
+
+In general, two variables are **positively associated** if high values of one variable tend to accompany high values of the other and low values of one variable tend to accompany low values of the other.
+
+Let's look at that scatterplot again and add a vertical line that marks the *mean* of the right handspans and a horizontal line that marks the *mean* of the left handspans.
+
+```{r,fig.width=5,fig.height=5}
+meanX=mean(pennstate1$RtSpan,na.rm=TRUE)
+meanX
+meanY=mean(pennstate1$Height,na.rm=TRUE)
+meanY
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Association Between Right Handspan and Height", pch=19,
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            }) 
+```
+
+Notice that there are more points in the upper right box and lower left box than in the other two boxes.  The upper right box includes points from individuals with higher than average right handspans **and** higher than average heights.  The lower left box includes points from individuals with lower than average right handspans **and** lower than average heights.  When most of the points in a scatterplot are located in these two boxes, the variables are **positively associated**.  
+
+Two variables are **negatively associated** if high values of one variable tend to accompany low values of the other and low values of one variable tend to accompany high values of the other.
+
+Let's take a look at an example of **negatively associated** variables.
+
+```{r, fig.width=5,fig.height=5} 
+meanX=mean(m111survey$GPA,na.rm=TRUE)
+meanY=mean(m111survey$height,na.rm=TRUE)
+xyplot(height~GPA,data=m111survey,xlab="GPA", ylab="Height (in)", main="Association Between GPA at GC and Height", pch=19,
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+
+Notice that this time there are more points in the upper left box and the lower right box.  The upper left box includes points from individuals with lower than average GPA's **and** higher than average heights.  The lower right box includes points from individuals with higher than average GPA's **and** lower than average heights.  When most of the points in a scatterplot are located in these two boxes, the variables are **negatively associated**. 
+
+Two variables have **no association** if there is no apparent relationship between the two variables. 
+
+Let's look at the *association* between an individuals height and the hours of sleep they got last night.  
+
+```{r.fig.width=5,fig.height=5}
+meanX=mean(pennstate1$Height,na.rm=TRUE)
+meanY=mean(pennstate1$HrsSleep,na.rm=TRUE)
+xyplot(HrsSleep~Height,data=pennstate1,xlab="Height (in)", ylab="Hours of Sleep", main="Association Between Height and Hours of Sleep", pch=19,
+        panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+
+Here, it appears that all of the boxes have *about* the same number of points in them.  When this is the case, the variables are **not associated**.
+
+In this class, we are only interested in variables that appear to have a **linear association**.  Our goal is to describe the *linear association* that we see in a scatterplot using the equation of a line.
+
+**Note**:  **Curvilinear** data certainly exists.   **Curvilinear** data follows the trend of a curve, rather than a line.  We will not discuss this kind of data this semester.  However, you should be aware that not every dataset you see follows a linear pattern.  You can see an example of curvilinear data by looking at the ``fuel`` dataset.  Read the ``help`` file on this data to understand what the variables are.
+
+
+```{r, fig.width=5,fig.height=5}
+data(fuel)
+xyplot(efficiency~speed,data=fuel,xlab="Speed (kilometers per hour)",ylab="Efficiency (liters of fuel required to travel 100 km)",main="Efficiency vs. Speed", pch=19)
+```
+
+Clearly, this data would not be well represented by a line!
+
+
+Correlation
+-----------
+
+So far, we've investigated relationships between two numerical variables by looking at the *scatterplot* and making note of the observed *pattern* and *direction* of the *association*.  
+
+Check out the following scatterplots from ``m111survey``:
+
+```{r fig.width=5, fig.height=5}
+meanX=mean(m111survey$height,na.rm=TRUE)
+meanY=mean(m111survey$fastest,na.rm=TRUE)
+xyplot(fastest~height, data=m111survey,xlab="Height (in)", ylab="Top Speed (mph)", main="Relationship Between Height and Top Speed",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+
+```{r, fig.width=5, fig.height=5}
+meanX=mean(m111survey$height,na.rm=TRUE)
+meanY=mean(m111survey$ideal_ht,na.rm=TRUE)
+xyplot(ideal_ht~height, data=m111survey, xlab="Height (in)", ylab="Ideal Height (in)", main="Relationship Between Actual Height and Ideal Height",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+
+These scatterplots both display 2 variables that are **positively associated**, but there is less "scatter" in the second plot.  The variable ``height`` appears to have a stronger *association* with ``ideal_ht`` than it does with ``fastest``.  It would be useful to assign a numerical value to the **strength of association**.
+
+**Correlation** is the numerical measure of the direction and strength
+of the linear association between two numerical variables.
+
+Sometimes you see the formula for the *correlation coefficient*, $r$, written like this:
+
+$$ r=\frac{1}{n-1}\sum{\bigg(\frac{x_i-\bar{x}}{s_x}\bigg)\bigg(\frac{y_i-\bar{y}}{s_y}\bigg)}  $$
+
+where:
+
+* $n$ denotes the number of values in the list
+* $\sum$ means summing
+* $x_i$ denotes the individual $x$ values 
+* $\bar{x}$ denotes the average of the $x$'s
+* $s_x$ denotes the SD of the $x$'s
+* $y_i$ denotes the individual $y$ values 
+* $\bar{y}$ denotes the average of the $y$'s
+* $s_y$ denotes the SD of the $y$'s
+
+This is a symbolic way of saying:
+
+* For each ordered pair of data, ($x, y$) in the scatterplot, multiply the $z$-score for $x$ by the $z$-score for $y$.
+
+* Add all of these products up.
+
+* Average them, almost, by dividing by how many there are MINUS ONE. 
+
+
+Here's how it can be worked out in R:
+```{r}
+FakeData.x=c(2, 4, 6, 6, 7)
+FakeData.y=c(4, 6, 7, 2, 6)
+n=length(FakeData.x)
+n
+x.bar=mean(FakeData.x)
+x.bar
+s.x=sd(FakeData.x)
+s.x
+y.bar=mean(FakeData.y) 
+y.bar
+s.y=sd(FakeData.y)
+s.y
+zscore.x=(FakeData.x-x.bar)/s.x #This will be a list of 5 z-scores. One for each x.
+zscore.x
+zscore.y=(FakeData.y-y.bar)/s.y #This will be a list of 5 z-scores. One for each y.
+zscore.y
+r=sum(zscore.x*zscore.y)/(n-1)
+r
+```
+
+Of course, R has a built-in formula for correlation:
+
+```{r}
+FakeData.x=c(2, 4, 6, 6, 7)
+FakeData.y=c(4, 6, 7, 2, 6)
+cor(FakeData.x,FakeData.y) #This function requires a list of x-values and y-values
+```
+
+### What does the value of $r$ tell us, anyways?
+
+For the dataset above, $r=`r cor(FakeData.x,FakeData.y)`$.  What does this number mean?
+
+Let's take a look at what value of $r$ you might *expect* for **positively correlated** variables.  Recall the discussion we had about the boxes that we made in the scatterplot. To jog our memory, let's look at a scatterplot broken into the four boxes that are formed by the two "mean" lines:
+
+```{r,fig.width=5,fig.height=5}
+meanX=mean(pennstate1$RtSpan,na.rm=TRUE)
+meanY=mean(pennstate1$Height,na.rm=TRUE)
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Association Between Right Handspan and Height",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            }) 
+```
+
+We've looked at this scatterplot before, and decided that it indicates a positive association between **RtSpan** and **Height**.  This time, though, let's think carefully about how the points in the scatterplot contribute to the value of $r$.  Check out the formula again:
+
+$$ r=\frac{1}{n-1}\sum{\bigg(\frac{x_i-\bar{x}}{s_x}\bigg)\bigg(\frac{y_i-\bar{y}}{s_y}\bigg)}  $$
+
+* When an $x$-value lies *above* the mean of the $x$'s, it's $z$-score is **positive**.  Likewise, a $y$-value that lies *above* the mean of the $y$'s has a **positive** $z$-score.  Every ordered pair in the upper right box has an $x$ and $y$-coordinate with **positive** $z$-scores. Multiplying 2 positive $z$-scores together gives us a **positive** number.  So, every point in the upper right box contributes a positive number to the sum in the formula for $r$.  
+
+* When an $x$-value lies *below* the mean of the $x$'s, it's $z$-score is **negative**.  Likewise for $y$.  Every ordered pair in the lower right box has an $x$ and $y$-coordinate with **negative** $z$-scores.  Multiplying 2 negative $z$-scores together gives us a **positive** number.  So, every point in the lower left box has a positive contribution to the value of $r$.  
+
+>**Practice**:  Convince yourself that points in the upper left box and the lower right box will contribute **negative** numbers to the sum of $r$.  
+
+Since **positively associated** variables have *most* of their points in the upper right and lower left boxes, *most* of the numbers being contributed to the summation are **positive**.  There are some negative numbers contributed from the points in the other boxes, but not nearly as many.  When these values are summed, we end up with a **positive** number for $r$.  So we say that these variables are **positively correlated**!
+
+**Moral**:  **Positively associated** variables have a **positive correlation** coefficient, $r>0$.
+
+```{r}
+cor(pennstate1$Height, pennstate1$RtSpan)
+```
+
+Another way to accomplish this is:
+
+```{r}
+with(pennstate1,cor(Height,RtSpan))
+```
+
+The ``cor(x,y)`` function works just fine as long as ``x`` and ``y`` are complete lists of values of the same length.  
+
+``x`` and ``y`` have to be the **same length** because the corresponding entries in ``x`` and ``y`` form ordered pairs.  For example, the first entry ``x[1]`` and the first entry ``y[1]`` form the first ordered pair (x_1,y_1) on the scatterplot.   If the lists ``x`` and ``y`` have different lengths, there wouldn't be a direct match-up to form these ordered pairs.  
+
+``x`` and ``y`` have to be **complete** (no ``NA`` values) lists for this same reason.  Setting ``cor(x,y,na.rm=TRUE)`` will remove any ``NA`` values present in the ``x`` list and the ``y`` list.  However, you may then be left with a $y_i$ that doesn't have a corresponding $x_i$.  For example, consider the following made-up data:  
+
+```{r}
+FakeData.x=c(2, NA, 6, 6, 7, 10, 10, 15, 18, NA)
+FakeData.y=c(4, 6, 7, 2, NA, 6, 4, NA, 15, 2)
+cor(FakeData.x,FakeData.y)
+```
+
+One way to deal with this is to remove the entire ordered pair if one of the coordinates is ``NA``.  These points don't show up in the scatterplot anyways, so they're not contributing to the *association* that you observe.  
+
+We can remove the ordered pairs quickly with R's ``use`` argument.
+
+```{r}
+cor(FakeData.x,FakeData.y,use="na.or.complete")
+```
+
+>**Practice**:  Do you think the correlation coefficient, $r$, for ``height`` and ``ideal_ht`` in the ``m111survey`` will be *bigger* or *smaller* than `r cor(pennstate1$Height, pennstate1$RtSpan)`?  Why?? Calculate it and see if your guess was correct!
+
+
+In a similar manner, we can argue that since *most* of the points in a scatterplot of **negatively associated** variables are located in the upper left and lower right boxes, most of the products being contributed to the sum of $r$ are negative (with a few positive ones sprinkled in).  This gives us a **negative** number for $r$.  So we say that these variables are **negatively correlated**! 
+
+**Moral**:  **Negatively associated** variables have a **negative** correlation coefficient, $r<0$.
+
+>**Practice**:  What do you think the value of $r$ is for 2 variables with essentially **no association**?  It may help you to look back at the example scatterplot, which we reproduce below:
+
+```{r,fig.width=5,fig.height=5}
+meanX=mean(pennstate1$Height,na.rm=TRUE)
+meanY=mean(pennstate1$HrsSleep,na.rm=TRUE)
+xyplot(HrsSleep~Height,data=pennstate1,xlab="Height (in)", ylab="Hours of Sleep", main="Association Between Height and Hours of Sleep",
+        panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+
+### Properties of $r$
+
+* $r$ always falls between 1 and -1.
+
+* The **sign** of r indicates the *direction* of the relationship.
+
+  * $r>0$ indicates a *positive association*
+  * $r<0$ indicates a *negative association*
+
+* The **magnitude** of r indicates the *strength* of the relationship.
+
+  * $r = 1$ indicates a *perfect positive* linear relationship. All points fall exactly on a line sloping upward.
+  * $r = -1$ indicates a *perfect negative* linear relationship. All points fall exactly on a line sloping downward.
+  * $r = 0$ indicates *no* linear relationship.
+  
+The following ``manipulate`` app will let you explore this further.  Don't worry about the checkbox right now.  We'll discuss that later.
+
+```{r, eval=FALSE}
+require(manipulate)
+VaryCorrelation()
+```
+
+>**Practice**:  Investigate the following Research Question:  At UCDavis, how is a student's mom's height (``momheight``) related to their dad's height (``dadheight``)?  Create a scatterplot and calculate $r$.
+
+>**Practice**:  Investigate the following Research Question:  At UCDavis, how is a student's mom's height (``momheight``) related to their GPA (``GPA``)?  Create a scatterplot and calculate $r$.
+
+
+
+Regression Equation
+-------------------
+
+**Regression analysis** is used to numerically explain the linear
+relationship between two quantitative variables using the equation of a line.  It is much more specific than the visual analysis we've been making by looking at scatterplots.
+
+A line equation was used to describe the *deterministic* relationship between degreen Celcius and degrees Fahrenheit.
+
+$$y=\frac{5}{9}(x-32)$$
+
+This equation let us determine the **exact** temperature in Celcius by knowing the temperature in Fahrenheit.
+
+The **regression equation** is the equation of a line that is used to *predict* the value for the response variable ($y$) from a known value of the explanatory variable ($x$).  It describes how, *on average*, the response variable is related to the explanatory variable.  
+
+**Recall**:  The equation of a **regression** line:
+
+$$\hat{y}=a+bx$$
+
+where
+* $a$ is the *$y$-intercept*.  (The $y$-intercept is the point where the line crosses the vertical axis.  It is the height of the line at $x=0$.)
+
+* $b$ is the *slope*. (The slope is the inclination or orientation of the line.  It is calculated by the ratio $\frac{\mbox{rise}}{\mbox{run}}$.)
+
+* $x$ is the *known* value of the explanatory variable.
+
+* $\hat{y}$ is the *predicted* value of the response variable.
+
+Each point $(x,y)$ on the scatterplot is an observation - known $x$ and $y$-values. Each point $(x,\hat{y})$ on the regression line is a known $x$-value and its predicted response, $\hat{y}$.
+
+Let's take a look at a scatterplot with the **regression line** by going back to the ``manipulate`` app ``VaryCorrelation`` and checking the "Show Regression Line" checkbox.
+
+```{r, eval=FALSE}
+require(manipulate)
+VaryCorrelation()
+```
+
+**Our Goal**:  Find the equation of the line that best approximates the data in the scatterplot.
+
+How do we know what values of $a$ and $b$ will create this line that *"best fits"* the data?  Well that depends on what we mean by  *"best fit"*.  We need a couple of definitions first.
+
+First, **residuals** measure the size of the prediction errors. So, for a given
+data point $(x,y)$, the residual is the difference between the observed response and the response that is predicted by the regression line.  You might see this written:
+
+$$y - \hat{y}.$$
+
+On the graph, this would be the vertical distance between a point and the regression line.  
+
+The *regression* ("best fit") line is the line that is collectively the closest, in terms of vertical measurement, to all of the points on the scatterplot.
+
+In other words, the regression line $\hat{y} = a + bx$ is determined by choosing $a$ and $b$ so that the sum of the (squared) residuals is minimized.
+
+$$\mbox{Sum of Squares }= \sum(\mbox{ residuals})^2 = \sum(y_i-\hat{y})^2 $$
+
+Let's check this out with the following game!  
+```{r, eval=FALSE}
+require(manipulate)
+FindRegLine()
+```
+
+When you gave up and checked "I quit--show the reg line!", the **regression line** showed up in red on your graph and R output the values for $a$ and $b$ in the Console.  You might be wondering...how were $a$ and $b$ calculated?
+
+$$\mbox{slope }= b = r \cdot \frac{s_y}{s_x},$$
+where
+* $r$ is the correlation coefficient,
+* $s_y$ is the SD of the $y$'s in the scatterplot, and
+* $s_x$ is the SD of the $x$'s in the scatterplot.
+
+$$\mbox{intercept }= a = \bar{y}-b\cdot\bar{x},$$
+where
+* $b$ is the slope calculated above,
+* $\bar{y}$ is the mean of the $y$'s in the scatterplot, and 
+* $\bar{x}$ is the mean of the $x$'s in the scatterplot.
+
+Before interpreting these formulas, let's look at a little late 19th century history.  Sir Francis Galton, a half-cousin of Charles Darwin, made important contributions to many scientific fields, including biology and statistics.  He had a special interest in heredity and how traits are passed from parents to their offspring.  He noticed that extreme characteristics in parents are not completely passed on to their children.  
+
+Consider height, for example: 
+
+```{r, fig.width=5,fig.height=5}
+data(galton)
+xyplot(sheight~fheight,data=galton,xlab="Fathers' Heights", ylab="Sons' Heights", main="Relationship Between Father and Sons' Heights")
+```
+
+It seems reasonable to think that an average height father would probably have an average height son.  So surely our "best fit" line should pass through the *point of averages*, $(\bar{x},\bar{y})$.   
+
+```{r,fig.width=5,fig.height=5}
+x.bar=mean(galton$fheight)
+y.bar=mean(galton$sheight)
+xyplot(sheight~fheight,data=galton,xlab="Fathers' Heights", ylab="Sons' Heights", main="Relationship Between Father and Sons' Heights",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.points(x.bar,y.bar,pch=19,col="red")
+            })
+```
+
+Intuitively, it might also seem that a reasonably tall father, say, 1 standard deviation taller than average would produce a reasonably tall son, also about 1 standard deviation taller than average. The line that would "best fit" this assumption would have slope equal to $\frac{s_y}{s_x}$.
+
+```{r,fig.width=5,fig.height=5}
+x.bar=mean(galton$fheight)
+y.bar=mean(galton$sheight)
+s.x=sd(galton$fheight)
+s.y=sd(galton$sheight)
+xyplot(sheight~fheight,data=galton,xlab="Fathers' Heights", ylab="Sons' Heights", main="Relationship Between Father and Sons' Heights",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.points(x.bar,y.bar,pch=19,col="red")
+             panel.abline(v=x.bar+s.x,lty="dashed",col="red")
+             panel.abline(v=x.bar-s.x,lty="dashed",col="red")
+             panel.abline(h=y.bar+s.y,lty="dashed",col="red")
+             panel.abline(h=y.bar-s.y,lty="dashed",col="red")
+             panel.abline(a=y.bar-(s.y/s.x)*x.bar,b=s.y/s.x,col="red")
+            })
+```
+
+However, this **is not** the "best fit" line.  It does not minimize the Sum of Squares! Check out how the *regression* line looks in comparison to this *standard deviation* line. 
+
+```{r,fig.width=5,fig.height=5}
+x.bar=mean(galton$fheight)
+y.bar=mean(galton$sheight)
+s.x=sd(galton$fheight)
+s.y=sd(galton$sheight)
+xyplot(sheight~fheight,data=galton,xlab="Fathers' Heights", ylab="Sons' Heights", main="Relationship Between Father and Sons' Heights",
+       panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.points(x.bar,y.bar,pch=19,col="red")
+             panel.abline(v=x.bar+s.x,lty="dashed",col="red")
+             panel.abline(v=x.bar-s.x,lty="dashed",col="red")
+             panel.abline(h=y.bar+s.y,lty="dashed",col="red")
+             panel.abline(h=y.bar-s.y,lty="dashed",col="red")
+             panel.abline(a=y.bar-(s.y/s.x)*x.bar,b=s.y/s.x,col="red")
+             panel.abline(lm(sheight~fheight,data=galton))
+            })
+```
+
+
+The slope of the SD line is $b=\frac{s_y}{s_x}$.  The slope of the regression line is $b=r\cdot\frac{s_y}{s_x}$.  Since $r$ is a value between -1 and 1, you can see why this causes the regression line to be more *shallow*.
+
+This is what is known as the **regression effect** or **regression to the mean**.  Extremely tall fathers do tend to have taller than average sons, but the sons don't tend to be as extreme in height as their fathers.  Likewise for short fathers.
+
+Check out the ``manipulate`` app to explore this idea further!
+
+```{r, eval=FALSE}
+require(manipulate)
+ShallowReg()
+```
+
+Okay, now we know what the regression equation means and how it is found.  Let's use it to make some statements about the Pennstate scatterplot of heights and right handspans.  
+
+### Research Question:  What is the predicted height of a Pennstate student with a  right handspan measurement of 22 cm?
+
+Since we know the formulas for slope and intercept, we can find the equation of the regression line as follows:
+
+```{r}
+x.bar=mean(pennstate1$RtSpan)
+y.bar=mean(pennstate1$Height)
+s.x=sd(pennstate1$RtSpan)
+s.y=sd(pennstate1$Height)
+r=cor(pennstate1$RtSpan,pennstate1$Height)
+b=r*(s.y/s.x)
+b
+a=y.bar-b*x.bar
+a
+```
+
+So the equation of our regression line is:
+
+$$\hat{y}=`r a`+`r b`x.$$
+
+Let's add this line to the scatterplot.
+
+```{r,fig.width=5,fig.height=5}
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height",
+      panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(a,b,col="red")
+            } ) 
+```
+
+Of course, R has a built-in formula for this!
+
+```{r}
+mymod=lm(Height~RtSpan,data=pennstate1)
+summary(mymod)
+```
+
+The ``lm`` stands for "linear model".  Now, we can add this line to the scatterplot as follows:
+
+```{r,fig.width=5,fig.height=5}
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height", type=c("r","p")) 
+```
+
+It will be useful to be able to input the known $x$ value and the linear model into a function that outputs the prediction for $y$, namely $\hat{y}$.
+
+Check it out!
+
+```{r}
+y.hat=function(x,lin.mod){
+  b=lin.mod$coefficient[2]
+  a=lin.mod$coefficient[1]
+  y.hat=a+b*x
+  names(y.hat)="(Predicted y)"
+  print(y.hat)
+  } 
+```
+
+Now, we can use this function to answer our research question.  What is the predicted height of a Pennstate student with a  right handspan measurement of 22 cm?
+
+```{r}
+y.hat(x=22, mymod)
+```
+
+>**Practice:** Investigate the Research Question:  A UCDavis student has a father who is 65 inches tall.  Make the regression line for the scatterplot and use it to predict how tall the student's mother is.
+
+###  Interpretation of Slope and Intercept
+
+It's also important that we know how to interpret the *slope* and *intercept* of a regression line.  Let's take a look at a different dataset; ``pushups`` in ``tigerstats``.  Run the ``help`` command to read about the data.  
+
+Now's let's look at the raw data and the regression line:
+
+```{r,fig.width=6,fig.height=6}
+data(pushups)
+xyplot(weight~pushups,data=pushups,xlab="Number of Pushups", ylab="Weight of Participant (lbs)", main="GC Football Player's Weight vs. Max Number of Pushups ", type=c("r","p"))
+
+mymod=lm(weight~pushups,data=pushups)
+summary(mymod)
+```
+
+* What does the **intercept** *mean*?  `r lm(weight~pushups,data=pushups)$coefficient[1]` is the *predicted* weight of a GC football player who cannot do any pushups.
+
+* What does the **slope** *mean*?  The *predicted* weight of a football player changes by `r lm(weight~pushups,data=pushups)$coefficients[2]` pounds as the max number of pushups increases by 1.  This tells us that there is a *negative* association between max number of pushups and weight!
+
+**Note** The interpretation of the intercept doesn't always make sense!  Consider, for example, what would happen if we used ``weight`` as the explanatory variable and ``pushups`` as the response.
+
+```{r,fig.width=6, fig.height=6}
+xyplot(pushups~weight,data=pushups,xlab="Weight of Participant (lbs)", ylab="Number of Pushups", main="Max Number of Pushups vs. GC Football Player's Weight", type=c("r","p"))
+
+mymod=lm(pushups~weight,data=pushups)
+summary(mymod)
+```
+
+>**Practice:** Interpret the *intercept* for this situation.  Does it make sense?  
+
+>**Practice:**  Interpret the *slope*.  Does it make sense?
+
+
+>**Practice:**  Find the regression line that can be used to predict an individual's total SAT score from his or her Math subscore.  Interpret the *slope* and *intercept*.
+
+### How Well does our Regression Line really fit?
+
+If all the data in a scatterplot lie *on* the regression line, we say that our regression line perfectly explains the data.  However, this is rarely the case!  We usually have points that do not lie on the regression line.  Anywhere that this happens, we have *variation* that is not explained by the regression line.  If the data is not on a line, then a line will not be a *perfect* explanation of the data. 
+
+So, how good is it?  In other words, how well does our line do in explaining the variation that we see in the scatterplot?
+
+One way we can measure this variation is the **residual standard error**.  This does exactly what it sounds like - it measures the *spread* of the residuals (those vertical distances between observations and the regression line).  This is in the  summary output of the ``lm`` function.  
+
+However, we run into a problem when using the **residual standard error** measurement to measure the variation in the plot.  Consider the following models:
+
+```{r}
+mymod1=lm(Height~RtSpan,data=pennstate1)
+mymod2=lm(I(Height/12)~RtSpan,data=pennstate1)
+```
+
+The only difference between these models is the unit of response variable.  In ``mod1``, height is measured in inches.  In ``mod2``, height is measured in feet.  This has no affect on the relationship that we observe between ``Height`` and ``RtSpan``.  You can see this for yourself!
+
+```{r, fig.width=4,fig.height=4}
+xyplot(Height~RtSpan,data=pennstate1, xlab="Right Handspan (cm)", ylab="Height (in)", main="Right Handspan (cm) vs Height (in)", type=c("r","p"))
+
+xyplot(I(Height/12)~RtSpan,data=pennstate1,  xlab="Right Handspan (cm)", ylab="Height (ft)", main="Right Handspan (cm) vs Height (ft)", type=c("r","p"))
+```
+
+This change in unit directly affects the residuals!  The residuals in the first plot are much bigger than the residuals in the second plot.  This causes the *spread* of the residuals (the **residual standard error**) to be bigger in the first plot. 
+
+```{r}
+summary(mymod1)
+summary(mymod2)
+```
+
+But the regression line did an equally good job of fitting the data, in both scatterplots!  Hence residual standard error is not the best way of measuring the variation accounted for by the regression line.   
+
+Another measurement of the "explained variation" in the scatterplot is the **squared correlation**, $r^2$.  This also measures well our regression line fits the data.  However, it tells us the *proportion* of variation in the response variable that is explained by the explanatory variable.  A change in unit (or scale) will not affect the value of $r^2$.  
+
+### Properties of $r^2$
+
+* $r^2$ always has a value between 0 and 1.
+* $r^2=1$ implies perfect correlation between explanatory and response variables.
+* $r^2=0$ implies no correlation.
+* **Beware**:  A low $r^2$ value does not necessarily mean that there is **no** relationship between the explanatory variable and the response.  It might mean that a linear model is not an appropriate model!  So, a low $r^2$ value means one of two things for us:
+
+  *  There is a linear relationship between the variables, but there's just alot of scatter in the data.
+  *  You might have the wrong model.  In other words, the data might not follow a linear pattern.  Consider the relationship we saw in the curvilinear ``fuel`` data from before.  
+
+```{r,fig.width=5,fig.height=5}
+data(fuel)
+xyplot(efficiency~speed,data=fuel,xlab="Speed (kilometers per hour)",ylab="Efficiency (liters of fuel required to travel 100 km)",main="Efficiency vs. Speed", pch=19,type=c("r","p"))
+mymod=lm(efficiency~speed,data=fuel)
+summary(mymod)
+```
+
+Here, we get a small $r^2$ value.  However, there is certainly a relationship between ``efficiency`` and ``speed`` - just not a *linear* one!  It is always important that you visually examine the data before drawing conclusions based on certain statistics!
+
+>**Practice**:  What proportion of variation in SAT scores can be accounted for by the linear relationship between math subscores and SAT scores?
+
+Cautions
+--------
+### Extrapolation
+
+The regression line we found for predicting heights from right handspans, $\hat{y}=`r a`+`r b`x$. can be used for **interpolation**, i.e. predicting a height for a person that was not in the original dataset, but is within the range of right handspans covered by the dataset.
+
+>**Practice**:  Use the regression line to predict the height of an individual whose right handspan measured 16.2 cm.
+
+**Extrapolation** is using a regression line to predict $y$-values for
+$x$-values outside the observed $x$-values.
+
+Sultan Kosen holds the Guiness World Record for the tallest living male. (His right handspan measures 30.48 cm, which is considerably bigger than all of the hand-spans in our dataset.  If we extrapolate using the regression line from this dataset, then we would predict his height to be $\hat{y}=`r a`+`r b`\cdot 30.48=79.36$ inches $\approx$ 6' 7.5".  But he was really 8' 3"!  The prediction based on extrapolation was way off. 
+
+### Influential Observations
+
+**Influential observations** are observations which have a large effect on correlation and regression:
+
+*  They have extreme x-values. 
+*  They inflate or deflate correlation. 
+*  Their affect the slope of the regression line.
+
+Check out the ``manipulate`` app to find out more about **influential observations**.
+
+```{r, eval=FALSE}
+require(manipulate)
+Points2Watch()
+```
+
+### Association versus Causation
+
+A high positive (or high negative) correlation between two variables means that there *is* a linear association that exists between them.  However, correlation does *not* imply causation.
+
+```{r,fig.width=5,fig.height=5}
+xyplot(fastest~height,data=m111survey,xlab="height (in)", ylab="Top Speed (mph)", main="Relationship Between Height and Top Speed") 
+
+cor(m111survey$height,m111survey$fastest)
+```
+
+There a positive correlation between height and top speed.  This does not necessarily mean that being tall causes you to drive faster!  It's certainly not the case that tall people can't help but have a heavy foot.   
+
+> **Practice:**  Can you think of any **confounding variables** that might be (partially) responsible for the observed association?  Create a graph that takes this variable into account?
+
+
+### Simpson's Paradox
+
+**Recall**:  Simpson's Paradox occurs when the direction of the relationship between two variables is one way when you look at the aggregate data, but turns out the opposite way when you break up the data into subgroups based on a third variable.   *You saw this in Chapter 4 with two categorical variables!*
+
+**Simpson's Paradox** can arise with two numerical variables as well!
+
+Let's return to the ``sat`` dataset.  
+
+>**Practice:** Describe the relationship between ``salary`` and ``sat`` using a scatterplot, correlation coefficient, and regression line.  
+
+Our regression analysis suggests that as teachers are paid higher salaries, the average SAT score drops.  No way!!   Intuitively, it seems that higher salaries would attract better teachers, who in turn would better prepare students for the SAT.  What's going on here?
+
+Check out what happens when we take into account a third variable, ``frac``.  This is the percentage of students in the state who take the SAT.
+
+```{r, eval=FALSE}
+require(manipulate)
+DtrellScat(sat~salary|frac,data=sat)
+```
+
+We can see that within most subgroups, the slope of the regression line is positive, while the regression line for the overall data has a negative slope. 
+
+How can we explain this paradox?  
+
+**First Observation:**  It turns out that states where education is considered a high priority pay their teachers higher salaries.  But since education is a high priority in these states, a high proportion of students in these states want to go to college, so a high proportion of them take the SAT.  Similarly, states where education isn't such an important part of the economy or the culture tend to pay their teachers less, and they also tend to have fewer students taking the SAT.  So we've got a **positive** association between *frac* and **salary**.
+
+Check it out:
+
+```{r fig.width=4,fig.height=4}
+xyplot(salary~frac,data=sat,type=c("p","r"),
+       xlab="Percentage Taking SAT",
+       ylab="Mean Annual Teacher Salary (in $1000s)")
+```
+
+**Second Observation**:  When a high percentage of students in a state take the SAT, this pool of test-takers is bound to include both the very strong students and those who are not so strong, so the mean SAT score is liable to be low.  On the other hand, in states where fewer students take the SAT, the students who opt to take the test are likely to be highly motivated, definitely college-bound, very studious individuals.  This elite pool tends to boost the mean SAT score for the state.  So we've got a **negative** association between **frac** and **sat**.
+
+Again, check it out:
+
+```{r fig.width=4,fig.height=4}
+xyplot(sat~frac,data=sat,type=c("p","r"),
+       xlab="Percentage Taking SAT",
+       ylab="Mean SAT Score")
+```
+
+Finally, put it together:  the positive association between **salary** and **frac** and the negative association between **frac** and **sat** results in the negative association between **salary** and **sat**.
+
+To put it in a nontechnical "nutshell":  states where education is important tend to pay their teachers well, but they also "handicap" themselves by encouraging most students (including the weaker ones) to take tests like the SAT.  The handicap is so pronounced that higher values of **salary** tend to go along with lower values of **sat**.
+
+Thoughts on R
+-------------
+
+### Some important R functions from this Chapter:
+
+* **xtabs**:  formula-data approach:  ``xtabs(~exp+resp, data=Mydata)``
+* **xyplot**:  formula-data approach:  ``xyplot(x~y, data=Mydata)``
+  * conditioning:  ``xyplot(x~y|z, data=Mydata)``
+  * overlaying:  ``xyplot(x~y, groups=z, data=Mydata)``
+* **cor**  outputs the correlation coefficient between 2 numerical variables, $r$:  ``cor(x,y)``
+  * add ``use="na.or.complete"`` to the ``cor`` function to deal with missing values.
+* **lm**:  linear model using formula-data approach:  ``mymod=lm(x~y, data=Mydata)``  .
+  * **``summary(mymod)``**  Gives the details of the linear model, including the estimate for the slope and intercept.
+  * **y.hat**:  returns the predicted $y$ for a given $x$ and the appropriate linear model:  ``y.hat(x, lin.mod)``
+  
+  
+  
+GeekNotes
+---------
+
+### ``pch`` command
+
+The plot character, ``pch``, is an integer between 1 and 25 that controls how the points on your scatterplot appear.  Here's a good summary:
+
+```{r,fig.width=7,fig.height=5}
+x=seq(1,25,by=1)
+plot(1:25,1:25,axes=TRUE,col=0,xlab="pch",ylab="",main="Plot Characters")
+for(i in 1:25){
+points(x[i],y=5,pch=i,col="Blue")
+}
+```
+
+
+### Scatterplot Matrix
+
+We can create a matrix of scatterplots using the following ``pairs`` function in R. You only need to enter in the variables that you want plotted and their dataset.  R will create a square matrix of plots for every combination of your variables.  
+
+```{r}
+pairs(~height+sleep+GPA+fastest,data=m111survey)  #formula-data input
+```
+
+Of course, you can make this look nicer by changing the colors and plot characters.
+
+```{r}
+pairs(~height+sleep+GPA+fastest,data=m111survey,pch=19,col="red") 
+```
+
+You can also plot only the upper (or lower) panels.
+
+```{r}
+pairs(~height+sleep+GPA+fastest,data=m111survey,pch=19,col="red",lower.panel=NULL)
+```
