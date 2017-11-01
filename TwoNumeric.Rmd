@@ -59,6 +59,15 @@ Let's start by reviewing the difference between *categorical* and *numerical* va
 
 >**Practice:**  Classify each variable in the datasets ``pennstate1`` and ``ucdavis1``.
 
+**added stuff:**
+```{r}
+str(pennstate1)
+```
+
+```{r}
+str(ucdavis1)
+```
+
 ## Kinds of Relationships
 
 
@@ -134,7 +143,7 @@ Just like in Chapter 2, you can look at scatterplots in separate panels by "cond
 xyplot(Height~RtSpan|Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height")
 ```
 
-You may also want to "overlay"" two scatterplots, one for the guys and one for the gals.  Recall: overlaying can be accomplished using the *groups* argument:
+You may also want to "overlay" two scatterplots, one for the guys and one for the gals.  Recall: overlaying can be accomplished using the *groups* argument:
 
 ```{r fig.width=6, fig.height=6}
 xyplot(Height~RtSpan,groups=Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height and ",auto.key=TRUE)
@@ -144,6 +153,33 @@ xyplot(Height~RtSpan,groups=Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab
 
 >**Practice:** Investigate graphically the Research Question:  At UCDavis, how is a student's height (``Height``) related to his or her Dad's height (``dadheight``)?  Practice "overlaying" and "conditioning" on a categorical variable of your choice!  (Try a variable other than **Sex**.)  Describe any relationship that you observe.
 
+**Added stuff:**
+
+After viewing, the structured ``ucdavis1`` sample population, the data frame contains 173 observations of 12 variables. The 9 quantitative variables, listed as numeric, and 3 categorical variables listed as Factors— this lead to the use of the ``eval()`` function that displayed all 9 numeric variables; as continuous double values that lie in a range specific to each of the 173 individual values recorded within the dataset. 
+*The x—coordinate of the is that student’s dads’ height, in inches. 
+*The y-coordinate of the point is that student’s height, in inches. 
+Next method, placed all double values of the dads’ heights as the explanatory variable, and of the student’s heights to be the response variable. And then plotting a deterministic relationship graph below:
+```{r}
+xyplot(Height ~ dadheight,
+	data = ucdavis1,
+	type = c("p","r"),
+	lwd = 2, pch = 22,
+	main = "Relationship Between a Students Dad's Height and Their Height",
+	sub = "Fig. ADD:Scatter_plot[Deterministic Relationship]",
+	xlab = "Dads Height (in)",
+	ylab = "Students Height (in)")
+```
+
+Fig. Regression [Determanistic Relationship], notice that the taller a student’s dad’s height, the taller the student tended to  be. However, he scatterplot shows that there is variation in the points
+
+**ADDED STUFF: Statistical Relationship**
+
+On the other hand, this isn’t exact but simply an estimate. About the relationship between the height of a students dad and their height. Where the height of a students dad can help to estimate their height. If their dad is tall then they will tend to be taller than those with dads that are shorter in height. The deterministic relationship, figure above shows that the students with taller dads seem to be taller than those students with dads that are shorter.
+
+The variation shown within the overall pattern, in the points are several of the students with various heights, that all have a dad with a height of 74”in tall, this overall trend in the scatter plot is not perfect. 
+
+The direction of the overall pattern between both quantitative, continuous variables: ``dad height``, and ``Height`` are positively associated since the taller students’ tend to have dads with taller heighgts. Higher values of taller dad’s heights are associated with higher values of the student’s heights.
+ 
 **Scatterplots** allow us to visually identify 
 
 * overall patterns,
@@ -339,6 +375,10 @@ $$ r=\frac{1}{n-1}\sum{\bigg(\frac{x_i-\bar{x}}{s_x}\bigg)\bigg(\frac{y_i-\bar{y
 
 >**Practice**:  Convince yourself that points in the upper left box and the lower right box will contribute **negative** numbers to the sum of $r$.  
 
+**added stuff:**
+The pattern in the scatterplot shows most of its points within the upper left and lower right boxes showing that they are negatively associated variables.  Most of the products being contributed to the sum of ``r`` are negative. Making these variables to be negatively correlated.  
+
+
 Since **positively associated** variables have *most* of their points in the upper right and lower left boxes, *most* of the numbers being contributed to the summation are **positive**.  There are some negative numbers contributed from the points in the other boxes, but not nearly as many.  When these values are summed, we end up with a **positive** number for $r$.  So we say that these variables are **positively correlated**!
 
 **Moral**:  **Positively associated** variables have a **positive correlation** coefficient, $r>0$.
@@ -375,6 +415,20 @@ cor(FakeData.x,FakeData.y,use="na.or.complete")
 
 >**Practice**:  Do you think the correlation coefficient, $r$, for ``height`` and ``ideal_ht`` in the ``m111survey`` will be *bigger* or *smaller* than `r cor(pennstate1$Height, pennstate1$RtSpan)`?  Why?? Calculate it and see if your guess was correct!
 
+**added stuff: **
+
+The reason I think that the correlation coefficient, $r$, for the two variables ``height`` and ``ideal_ht`` in the ``m111survey`` will be *bigger* than `r cor(pennstate1$Height, pennstate1$RtSpan)`, is both variables in the m111survey have names that sound like they have a direct relationship, with ``ideal_ht`` as the dependent/response variable and height as an independent/explanatory variable. 
+
+```{r}
+cor(pennstate1$Height, pennstate1$RtSpan,data = pennstate1)
+```
+
+```{r}
+cor(ideal_ht~height,data=m111survey, use = "na.or.complete")
+```
+**Indeed, my guess was correct:** ``m111surve\y``  had the  *bigger* correlation coefficient.
+
+
 
 In a similar manner, we can argue that since *most* of the points in a scatterplot of **negatively associated** variables are located in the upper left and lower right boxes, most of the products being contributed to the sum of $r$ are negative (with a few positive ones sprinkled in).  This gives us a **negative** number for $r$.  So we say that these variables are **negatively correlated**! 
 
@@ -392,6 +446,10 @@ xyplot(HrsSleep~Height,data=pennstate1,xlab="Height (in)", ylab="Hours of Sleep"
              panel.abline(h=meanY,...)
             })
 ```
+
+**Added stuff:**
+The value of $r$ I guess would be “0” zero or have equal values, since there is no relationship, would be a non-liner association.
+
 
 ### Properties of $r$
 
@@ -417,8 +475,43 @@ VaryCorrelation()
 
 >**Practice**:  Investigate the following Research Question:  At UCDavis, how is a student's mom's height (``momheight``) related to their dad's height (``dadheight``)?  Create a scatterplot and calculate $r$.
 
+**added stuff:**
+```{r}
+meanX=mean(ucdavis1$dadheight,na.rm=TRUE)
+meanY=mean(ucdavis1$momheight,na.rm=TRUE)
+xyplot(momheight~dadheight,data=ucdavis1,xlab="Dads Height (in)", ylab="Moms Height (in)", main="Association Between Moms Height and Dads Height",
+        panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+```
+```{r}
+require(manipulate)
+cor(dadheight~momheight,data=ucdavis1, use ="na.or.complete")
+```
+
+
 >**Practice**:  Investigate the following Research Question:  At UCDavis, how is a student's mom's height (``momheight``) related to their GPA (``GPA``)?  Create a scatterplot and calculate $r$.
 
+**added stuff:**
+NO ASSCOIATION
+```{r}
+meanX=mean(ucdavis1$GPA,na.rm=TRUE)
+meanY=mean(ucdavis1$momheight,na.rm=TRUE)
+xyplot(momheight~GPA,data=ucdavis1,xlab="Grade Point Average (GPA)", ylab="Moms Height (in)", main="Association Between Moms Height and GPA",
+        panel=function(x,...) {
+             panel.xyplot(x,...)
+             panel.abline(v=meanX,...)
+             panel.abline(h=meanY,...)
+            })
+
+```
+
+```{r}
+cor(GPA~momheight,data=ucdavis1, use ="na.or.complete")
+
+```
 
 
 Regression Equation
@@ -427,7 +520,7 @@ Regression Equation
 **Regression analysis** is used to numerically explain the linear
 relationship between two quantitative variables using the equation of a line.  It is much more specific than the visual analysis we've been making by looking at scatterplots.
 
-A line equation was used to describe the *deterministic* relationship between degreen Celcius and degrees Fahrenheit.
+A line equation was used to describe the *deterministic* relationship between degrees Celcius and degrees Fahrenheit.
 
 $$y=\frac{5}{9}(x-32)$$
 
@@ -633,6 +726,14 @@ y.hat(x=22, mymod)
 
 >**Practice:** Investigate the Research Question:  A UCDavis student has a father who is 65 inches tall.  Make the regression line for the scatterplot and use it to predict how tall the student's mother is.
 
+**added stuff:**
+```{r}
+
+```
+
+
+
+
 ###  Interpretation of Slope and Intercept
 
 It's also important that we know how to interpret the *slope* and *intercept* of a regression line.  Let's take a look at a different dataset; ``pushups`` in ``tigerstats``.  Run the ``help`` command to read about the data.  
@@ -662,10 +763,27 @@ summary(mymod)
 
 >**Practice:** Interpret the *intercept* for this situation.  Does it make sense?  
 
+**added stuff:**
+
+```{r}
+
+```
+
 >**Practice:**  Interpret the *slope*.  Does it make sense?
 
+***added stuff:**
+```{r}
+
+```
 
 >**Practice:**  Find the regression line that can be used to predict an individual's total SAT score from his or her Math subscore.  Interpret the *slope* and *intercept*.
+
+**added stuff:**
+```{r}
+
+```
+
+
 
 ### How Well does our Regression Line really fit?
 
@@ -722,6 +840,12 @@ Here, we get a small $r^2$ value.  However, there is certainly a relationship be
 
 >**Practice**:  What proportion of variation in SAT scores can be accounted for by the linear relationship between math subscores and SAT scores?
 
+**added stuff:**
+```{r}
+
+```
+
+
 Cautions
 --------
 ### Extrapolation
@@ -729,6 +853,12 @@ Cautions
 The regression line we found for predicting heights from right handspans, $\hat{y}=`r a`+`r b`x$. can be used for **interpolation**, i.e. predicting a height for a person that was not in the original dataset, but is within the range of right handspans covered by the dataset.
 
 >**Practice**:  Use the regression line to predict the height of an individual whose right handspan measured 16.2 cm.
+
+**added stuff:**
+```{r}
+
+```
+
 
 **Extrapolation** is using a regression line to predict $y$-values for
 $x$-values outside the observed $x$-values.
@@ -764,6 +894,11 @@ There a positive correlation between height and top speed.  This does not necess
 
 > **Practice:**  Can you think of any **confounding variables** that might be (partially) responsible for the observed association?  Create a graph that takes this variable into account?
 
+**added stuff:**
+```{r}
+
+```
+
 
 ### Simpson's Paradox
 
@@ -774,6 +909,11 @@ There a positive correlation between height and top speed.  This does not necess
 Let's return to the ``sat`` dataset.  
 
 >**Practice:** Describe the relationship between ``salary`` and ``sat`` using a scatterplot, correlation coefficient, and regression line.  
+
+**added stuff:**
+```{r}
+
+```
 
 Our regression analysis suggests that as teachers are paid higher salaries, the average SAT score drops.  No way!!   Intuitively, it seems that higher salaries would attract better teachers, who in turn would better prepare students for the SAT.  What's going on here?
 
