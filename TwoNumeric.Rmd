@@ -153,8 +153,7 @@ xyplot(Height~RtSpan,groups=Sex,data=pennstate1,xlab="Right Handspan (cm)", ylab
 
 >**Practice:** Investigate graphically the Research Question:  At UCDavis, how is a student's height (``Height``) related to his or her Dad's height (``dadheight``)?  Practice "overlaying" and "conditioning" on a categorical variable of your choice!  (Try a variable other than **Sex**.)  Describe any relationship that you observe.
 
-**Added stuff:**
-
+**Added stuff**:
 After viewing, the structured ``ucdavis1`` sample population, the data frame contains 173 observations of 12 variables. The 9 quantitative variables, listed as numeric, and 3 categorical variables listed as Factors— this lead to the use of the ``eval()`` function that displayed all 9 numeric variables; as continuous double values that lie in a range specific to each of the 173 individual values recorded within the dataset. 
 *The x—coordinate of the is that student’s dads’ height, in inches. 
 *The y-coordinate of the point is that student’s height, in inches. 
@@ -701,7 +700,7 @@ summary(mymod)
 The ``lm`` stands for "linear model".  Now, we can add this line to the scatterplot as follows:
 
 ```{r,fig.width=5,fig.height=5}
-xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspan (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height", type=c("r","p")) 
+xyplot(Height~RtSpan,data=pennstate1,xlab="Right Handspand (cm)", ylab="Height (in)", main="Relationship Between Right Handspan and Height", type=c("r","p")) 
 ```
 
 It will be useful to be able to input the known $x$ value and the linear model into a function that outputs the prediction for $y$, namely $\hat{y}$.
@@ -728,7 +727,35 @@ y.hat(x=22, mymod)
 
 **added stuff:**
 ```{r}
+require(manipulate)
+lmGC(Height~dadheight,data=ucdavis1,graph = TRUE)
+studentHeight <- c(37.9876+0.4173*65)
+```
+```{r}
+studentHeight
+```
+```{r}
+lmGC(momheight~Height, data = ucdavis1,graph = TRUE)
+momsheight <- lmGC(momheight~Height,data=ucdavis1)
+predict(momsheight,65.1121)
 
+```
+```{r}
+momsheight
+```
+
+```{r}
+momsHt <- c(46.2055+0.2565*65.1121)
+momsHt
+```
+
+```{r}
+require(manipulate)
+predict(momsheight,65.1121,level=0.95)
+```
+
+```{r}
+predict(momsheight,65.1121,level = 0.80)
 ```
 
 
@@ -762,28 +789,36 @@ summary(mymod)
 ```
 
 >**Practice:** Interpret the *intercept* for this situation.  Does it make sense?  
-
-**added stuff:**
-
 ```{r}
-
+ r=lm(weight~pushups,data=pushups)$coefficient[1]
+r
 ```
+```{r}
+r2 =lm(weight~pushups,data=pushups)$coefficients[2]
+r2
+```
+
+**Answer:**
+Intercept Interpretation: 97.68 is the predicted maximum number of pushups of a GC football player who weighs -0.26514 pounds can do in 2 minutes. This doesn't make any logical sense.
 
 >**Practice:**  Interpret the *slope*.  Does it make sense?
 
-***added stuff:**
-```{r}
-
-```
+***Answer:**
+The predicted maximum number of pushups that a football player can do in two minutes changes by -0.26 as the weight of the football player increases by less than 1 pound. Another way to put it--for every quarter of a pound increase in weight, the predicted maximum number of pushups decreases by 0.26.
 
 >**Practice:**  Find the regression line that can be used to predict an individual's total SAT score from his or her Math subscore.  Interpret the *slope* and *intercept*.
 
-**added stuff:**
 ```{r}
+meanX=mean(sat$math,na.rm=TRUE)
+meanX
+meanY=mean(sat$sat,na.rm=TRUE)
+meanY
 
+lmGC(sat~math, data=sat,graph = TRUE)
 ```
 
-
+**Answer**:
+The association between a states SAT scores in relation to their math scores is a positive relationship. The regression line passes through the upper right and bottom left boxes.  
 
 ### How Well does our Regression Line really fit?
 
@@ -806,6 +841,7 @@ The only difference between these models is the unit of response variable.  In `
 xyplot(Height~RtSpan,data=pennstate1, xlab="Right Handspan (cm)", ylab="Height (in)", main="Right Handspan (cm) vs Height (in)", type=c("r","p"))
 
 xyplot(I(Height/12)~RtSpan,data=pennstate1,  xlab="Right Handspan (cm)", ylab="Height (ft)", main="Right Handspan (cm) vs Height (ft)", type=c("r","p"))
+
 ```
 
 This change in unit directly affects the residuals!  The residuals in the first plot are much bigger than the residuals in the second plot.  This causes the *spread* of the residuals (the **residual standard error**) to be bigger in the first plot. 
@@ -840,10 +876,17 @@ Here, we get a small $r^2$ value.  However, there is certainly a relationship be
 
 >**Practice**:  What proportion of variation in SAT scores can be accounted for by the linear relationship between math subscores and SAT scores?
 
-**added stuff:**
+**responce:**
 ```{r}
+meanX=mean(sat$math,na.rm=TRUE)
+meanX
+meanY=mean(sat$sat,na.rm=TRUE)
+meanY
 
+satmath <- lmGC(sat~math,data=sat,graph = TRUE)
+satmath
 ```
+
 
 
 Cautions
@@ -856,8 +899,19 @@ The regression line we found for predicting heights from right handspans, $\hat{
 
 **added stuff:**
 ```{r}
-
+Prepenn <- lmGC(Height~RtSpan, data = pennstate1, graph = TRUE)
+Prepenn
+predict(Prepenn,16.2)
 ```
+```{r}
+predict(Prepenn,16.2,level = 0.95)
+```
+```{r}
+predict(Prepenn,16.2,level = 0.80)
+```
+
+**Answer**:
+The predicted `Height` of a Penn state student with a `right hand span` of 16.2 (cm) is about 62.04 (in).
 
 
 **Extrapolation** is using a regression line to predict $y$-values for
@@ -894,11 +948,6 @@ There a positive correlation between height and top speed.  This does not necess
 
 > **Practice:**  Can you think of any **confounding variables** that might be (partially) responsible for the observed association?  Create a graph that takes this variable into account?
 
-**added stuff:**
-```{r}
-
-```
-
 
 ### Simpson's Paradox
 
@@ -912,8 +961,12 @@ Let's return to the ``sat`` dataset.
 
 **added stuff:**
 ```{r}
-
+lmGC(sat~salary,data = sat,graph = TRUE)
 ```
+
+**Answer**:
+The relationship between `salary` and `sat` is a negative relationship. The regression line goes through the upper left and lower right boxes. The regression analysis suggests that the higher  a teacher’s salary, that average SAT scores drop in response. 
+
 
 Our regression analysis suggests that as teachers are paid higher salaries, the average SAT score drops.  No way!!   Intuitively, it seems that higher salaries would attract better teachers, who in turn would better prepare students for the SAT.  What's going on here?
 
